@@ -31,7 +31,7 @@ public class reDuhClient {
 
     URL the_url;
     String the_prx;
-    int servicePort = 1010;
+    int servicePort = 1025;
     int remoteServicePort = -1;
     Hashtable inboundData = new Hashtable();
     Base64 encoder = new Base64();
