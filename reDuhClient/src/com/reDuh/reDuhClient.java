@@ -1,4 +1,4 @@
-package com.sensepost.reDuh;
+package com.reDuh;
 
 /**
  * The name? redirector.jsp ==> redir.jsp ==> reDuh.jsp

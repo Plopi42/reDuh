@@ -3,7 +3,7 @@
     <target name="create_jar">
         <jar destfile="dist/reDuhClient.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="com.sensepost.reDuh.reDuhClient"/>
+                <attribute name="Main-Class" value="com.reDuh.reDuhClient"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="bin"/>

@@ -1,4 +1,4 @@
-package com.sensepost.reDuh;
+package com.reDuh;
 
 //Base64 encoder/decoder for reDuh
 
