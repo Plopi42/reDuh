@@ -34,7 +34,6 @@ public class reDuhClient {
     int servicePort = 1025;
     int remoteServicePort = -1;
     Hashtable inboundData = new Hashtable();
-    Base64 encoder = new Base64();
     int newSockNum = 0;
     Queue httpDataBuffer = new LinkedList<String>();
     PrintWriter pr = null;
@@ -590,7 +589,6 @@ public class reDuhClient {
         int numberRead = 0;
         int bufferSize = 2500;
         byte[] buffer = null;
-        byte[] tmpBuffer = null;
         Socket toServiceLocalPort = null;
         String target = null;
         int targetPort = -1;
@@ -620,15 +618,8 @@ public class reDuhClient {
                     numberRead = fromClient.read(buffer, 0, bufferSize);
                     if (numberRead == -1) {
                         endOfTransmission = true;
-                    } else if (numberRead < bufferSize) {
-                        tmpBuffer = new byte[numberRead];
-                        for (int j = 0; j < numberRead; j++) {
-                            tmpBuffer[j] = buffer[j];
-                        }
-                        httpDataBuffer.add(target + ":" + targetPort + ":" + sockNum + ":" + (sequenceNumber++) + ":" + new String(encoder.encode(tmpBuffer)));
-                        System.out.println("[Info]Localhost ====> " + target + ":" + targetPort + ":" + sockNum + " (" + numberRead + " bytes read from local socket)");
                     } else {
-                        httpDataBuffer.add(target + ":" + targetPort + ":" + sockNum + ":" + (sequenceNumber++) + ":" + new String(encoder.encode(buffer)));
+                        httpDataBuffer.add(target + ":" + targetPort + ":" + sockNum + ":" + (sequenceNumber++) + ":" + new String(CryptUtils.base64encode(buffer, numberRead)));
                         System.out.println("[Info]Localhost ====> " + target + ":" + targetPort + ":" + sockNum + " (" + numberRead + " bytes read from local socket)");
                     }
 
@@ -667,7 +658,7 @@ public class reDuhClient {
                                 int bytesReadFromRemotePort = 0;
                                 for (int k = 0; k < data.length(); k += 4) {
                                     String inputChunk = data.substring(k, k + 4);
-                                    tmp = encoder.decode(inputChunk.getBytes());
+                                    tmp = CryptUtils.base64decode(inputChunk);
                                     bytesReadFromRemotePort += tmp.length;
                                     toClient.write(tmp);
                                 }

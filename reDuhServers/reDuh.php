@@ -3,6 +3,15 @@
 	ini_set('display_errors', true);
 	ini_set('html_errors', false);
 
+	function base64url_encode($plainText)
+	{
+		return strtr(base64_encode($plainText), '+/', '-_');
+	}
+
+	function base64url_decode($plainText)
+	{
+		return base64_decode(strtr($plainText, '-_', '+/'));
+	}
 
 	function errorlog($log)
 	{
@@ -143,7 +152,7 @@
 				else
 				{
 					$data = str_replace(" ", "+", $parts[5]);
-					$data = base64_decode($data);
+					$data = base64url_decode($data);
 
                     errorlog("BACKEND: newData(".$sequenceNumber.") with socketNumber ".$socketNumber.", host ".$targetHost.", port ".$targetPort.", data '".$data."'");
 
@@ -328,7 +337,7 @@
                                     while(strlen($data) > 0)
                                     {
                                         $tmp = substr($data,0,32*1024);
-                                        $b64data = base64_encode($tmp);
+                                        $b64data = base64url_encode($tmp);
                                         errorlog("BACKEND: *** Added ".strlen($b64data)." bytes to queue");
                                         array_push($clientdata,"[data]".$sockkey.":".$b64data);
 
